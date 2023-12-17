@@ -34,8 +34,8 @@ jobs:
       - name: Build Toolchain and SGDK
         if: steps.cache-marsdev.outputs.cache-hit != 'true'
         run: |
-          make -C marsdev m68k-toolchain-newlib sgdk
-          sudo make -C marsdev install
+          make m68k-toolchain-newlib sgdk
+          sudo make install
         working-directory: marsdev
 
       - name: Compile ROM
