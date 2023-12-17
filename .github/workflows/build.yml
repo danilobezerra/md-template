@@ -1,0 +1,39 @@
+name: Build and Upload ROM
+
+on:
+  pull_request:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: main
+
+      - name: Checkout marsdev repo
+        uses: actions/checkout@v4
+        with:
+          repository: andwn/marsdev
+          path: marsdev
+
+      - name: Build GCC Toolchain
+        run: make m68k-toolchain-newlib
+        working-directory: marsdev
+
+      - name: Build SGDK
+        run: make sgdk
+        working-directory: marsdev
+
+      - name: Install
+        run: sudo make install
+        working-directory: marsdev
+
+      - name: Build Game
+        run: make
+        working-directory: main
