@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Main Repo
+      - name: Checkout Main Repository
         uses: actions/checkout@v4
         with:
           path: main
@@ -21,29 +21,23 @@ jobs:
         id: cache-marsdev
         uses: actions/cache@v3
         with:
-          path: /opt/toolchains/mars
-          key: ${{ runner.os }}-marsdev
+          path: |
+            /opt/toolchains/mars
+            marsdev
+          key: ${{ runner.os }}-marsdev-${{ hashFiles('marsdev/Makefile') }}
 
-      - name: Checkout Marsdev Repo
+      - name: Checkout Marsdev Repository
         if: steps.cache-marsdev.outputs.cache-hit != 'true'
         uses: actions/checkout@v4
         with:
           repository: andwn/marsdev
           path: marsdev
 
-      - name: Build GCC Toolchain
+      - name: Build Toolchain and SGDK
         if: steps.cache-marsdev.outputs.cache-hit != 'true'
-        run: make m68k-toolchain-newlib
-        working-directory: marsdev
-
-      - name: Build SGDK
-        if: steps.cache-marsdev.outputs.cache-hit != 'true'
-        run: make sgdk
-        working-directory: marsdev
-
-      - name: Install Marsdev
-        if: steps.cache-marsdev.outputs.cache-hit != 'true'
-        run: sudo make install
+        run: |
+          make -C marsdev m68k-toolchain-newlib sgdk
+          sudo make -C marsdev install
         working-directory: marsdev
 
       - name: Compile ROM
