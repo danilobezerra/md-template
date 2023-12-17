@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Main Repository
+      - name: Checkout Main Repo
         uses: actions/checkout@v4
         with:
           path: main
@@ -21,12 +21,10 @@ jobs:
         id: cache-marsdev
         uses: actions/cache@v3
         with:
-          path: |
-            /opt/toolchains/mars
-            marsdev
+          path: /opt/toolchains/mars
           key: ${{ runner.os }}-marsdev-${{ hashFiles('marsdev/Makefile') }}
 
-      - name: Checkout Marsdev Repository
+      - name: Checkout Marsdev Repo
         if: steps.cache-marsdev.outputs.cache-hit != 'true'
         uses: actions/checkout@v4
         with:
