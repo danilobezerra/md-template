@@ -8,32 +8,50 @@ on:
 
 jobs:
   build:
+    name: Build ROM
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout Main Repo
         uses: actions/checkout@v4
         with:
           path: main
 
-      - name: Checkout marsdev repo
+      - name: Cache Marsdev
+        id: cache-marsdev
+        uses: actions/cache@v3
+        with:
+          path: /opt/toolchains/mars
+          key: ${{ runner.os }}-marsdev
+
+      - name: Checkout Marsdev Repo
+        if: steps.cache-marsdev.outputs.cache-hit != 'true'
         uses: actions/checkout@v4
         with:
           repository: andwn/marsdev
           path: marsdev
 
       - name: Build GCC Toolchain
+        if: steps.cache-marsdev.outputs.cache-hit != 'true'
         run: make m68k-toolchain-newlib
         working-directory: marsdev
 
       - name: Build SGDK
+        if: steps.cache-marsdev.outputs.cache-hit != 'true'
         run: make sgdk
         working-directory: marsdev
 
-      - name: Install
+      - name: Install Marsdev
+        if: steps.cache-marsdev.outputs.cache-hit != 'true'
         run: sudo make install
         working-directory: marsdev
 
-      - name: Build Game
+      - name: Compile ROM
         run: make
         working-directory: main
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: main/out/
+          if-no-files-found: error
